@@ -1,7 +1,7 @@
 from typing import Optional
 from google.cloud import firestore
-from aletheia.data.dataset import Dataset, File
-from experiment import Experiment
+from aletheia.data import Dataset, File
+from aletheia.experiment import Experiment
 
 
 class Metastore:

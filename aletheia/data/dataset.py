@@ -2,16 +2,7 @@ from uuid import uuid5, NAMESPACE_URL
 
 from aletheia._proto import dataset_pb2
 from google.protobuf import json_format
-from tensorflow import io
-import tensorflow as tf
-
 from aletheia.data.file import File
-
-TYPES = {
-    "int": tf.int64,
-    "float": tf.float32,
-    "string": tf.string
-}
 
 class Dataset:
     def __init__(self, name: str, file: File=None, features:dict={}, meta:str= "",
@@ -77,6 +68,14 @@ class Dataset:
         Gets the feature dict of the dataset for reading as a TFRecord
         :return: {"col", FixedLenFeature(shape, type)
         """
+        from tensorflow import io
+        import tensorflow as tf
+        TYPES = {
+            "int": tf.int64,
+            "float": tf.float32,
+            "string": tf.string
+        }
+
         types = self.features
         features = {}
         for k,v in types:

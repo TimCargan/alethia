@@ -1,7 +1,8 @@
 import time
+import aletheia
+import aletheia.data.local_cache
+from aletheia import Metastore
 
-from aletheia.metastore import Metastore
-from data import LocalCache
 
 ms = Metastore("zephyrus")
 plants_folds = {'far dane%27s': 0, 'asfordby b': 0, 'asfordby a': 0, 'kirton': 0,         'nailstone':    5,
@@ -13,7 +14,7 @@ plants_folds = {'far dane%27s': 0, 'asfordby b': 0, 'asfordby a': 0, 'kirton': 0
 ms.add_metadata("plant_folds", plants_folds)
 
 
-ms = Metastore("alethea-fcf82") # Get a projects metastore
+ms = aletheia.Metastore("alethea-fcf82") # Get a projects metastore
 
 # filestore = LocalCache()
 # ms.set_downloader(filestore)
