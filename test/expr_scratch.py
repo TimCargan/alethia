@@ -3,6 +3,15 @@ import time
 from aletheia.metastore import Metastore
 from data import LocalCache
 
+ms = Metastore("zephyrus")
+plants_folds = {'far dane%27s': 0, 'asfordby b': 0, 'asfordby a': 0, 'kirton': 0,         'nailstone':    5,
+          'kelly green': 1, 'bake solar farm': 1, 'newnham': 1, 'caegarw': 1,       'rosedew':      5,
+          'moss electrical': 2, 'caldecote': 2, 'clapham': 2, 'lains farm': 2,      'magazine':     5,
+          'roberts wall solar farm': 3, 'crumlin': 3, 'moor': 3, 'soho farm': 3,    'box road':     5,
+          'grange farm': 4, 'ashby': 4, 'somersal solar farm': 4, 'combermere farm': 4}
+
+ms.add_metadata("plant_folds", plants_folds)
+
 
 ms = Metastore("alethea-fcf82") # Get a projects metastore
 
