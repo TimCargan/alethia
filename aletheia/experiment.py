@@ -1,6 +1,7 @@
-from datetime import datetime
+from __future__ import annotations
 
-from data import Dataset
+from datetime import datetime
+from aletheia.data import Dataset
 from contextlib import contextmanager
 from google.cloud.firestore import DocumentReference
 from google.cloud import firestore
@@ -43,7 +44,7 @@ class Experiment:
             super().__setattr__(key, value)
             self._partial_update({key: value})
 
-    def start_sub_exper(self, run_id=None, collection:str="runs"):
+    def start_sub_exper(self, run_id=None, collection:str="runs") -> Experiment:
         run_id = run_id if run_id is not None else self._run_id()
         run_col = self._doc_ref.collection(collection)
         run_doc = run_col.document(run_id)
@@ -184,8 +185,24 @@ class Experiment:
 
     # TODO: write this to the db when called
     def add_metric(self, name: str, value):
+        """
+        Add a single value to the experiment metrics
+        :param name: name of the metric
+        :param value: value of the metric
+        :return:
+        """
         self._metrics[name] = value
         self._partial_update({f"metrics.{name}": value})
+
+    def add_metrics(self, metrics:dict):
+        """
+        Merge in a dict of metrics
+        #TODO Make this a single commit
+        :param metrics: dict of metrics to add
+        :return:
+        """
+        for k, v in metrics.items():
+            self.add_metric(k,v)
 
     def add_artifact(self, name: str, path, is_local=True, is_dir=True, upload_file=True):
         pass
