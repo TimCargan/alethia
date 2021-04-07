@@ -1,6 +1,6 @@
 from uuid import uuid5, NAMESPACE_URL
 
-from _proto import dataset_pb2
+from aletheia._proto import dataset_pb2
 from google.protobuf import json_format
 from tensorflow import io
 import tensorflow as tf

@@ -1,6 +1,6 @@
 from enum import Enum
 
-from _proto import file_pb2
+from aletheia._proto import file_pb2
 from google.protobuf import json_format
 from uuid import uuid5, NAMESPACE_URL
 
