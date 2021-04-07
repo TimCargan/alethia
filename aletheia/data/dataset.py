@@ -5,7 +5,7 @@ from google.protobuf import json_format
 from tensorflow import io
 import tensorflow as tf
 
-from data.file import File
+from aletheia.data.file import File
 
 TYPES = {
     "int": tf.int64,

@@ -1,7 +1,7 @@
 import logging
 
-from data import File
-from data.connectors.azure_datalake_connector import Azure_datalake_connector
+from aletheia.data import File
+from aletheia.data.connectors.azure_datalake_connector import Azure_datalake_connector
 import os
 
 CONNECTORS = {
