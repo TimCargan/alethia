@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package alethaia;
+
+import "google/protobuf/timestamp.proto";
+import "_proto/file.proto";
+import "_proto/dataset.proto";
+
+enum Status {
+  UNKNOWN = 0;
+  QUEUED = 1;
+  RUNNING = 2;
+  COMPLETE = 3;
+  ABORTED  = 4;
+  FAILED = 5;
+}
+
+message Model {
+  string id = 1;
+  string name = 2;
+
+  string description = 16;
+}
+
+message  Run{
+  string id = 1;
+  string command = 2;
+  string commitid = 3;
+  Status status = 4;
+
+  repeated File artifacts = 6;
+  repeated string datasets = 7;
+  map<string, string> meta = 8;
+
+  google.protobuf.Timestamp run_start = 18;
+  google.protobuf.Timestamp run_end = 19;
+}
+
+message Experiment {
+  string id = 1;
+  bool debug = 3;
+  Model model = 4;
+
+  repeated string datasets = 5;
+  repeated File artifacts = 6;
+  repeated File results = 7;
+
+  string notes = 16;
+  string description = 17;
+}

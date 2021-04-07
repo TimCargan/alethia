@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package alethaia;
+
+message File {
+  enum Connector {
+    LOCAL = 0;
+    AZURE_DATA_LAKE = 1;
+    GCP_FILE_STORE = 2;
+    GIT_HUB = 3;
+    AZURE_DATABRICKS = 4;
+    FIRESTORE = 5;
+  }
+
+  string id = 1;
+  string path = 2;
+  Connector connector = 3;
+  string mime_type = 4;
+  bool is_directory = 5;
+
+  string meta = 17;
+  oneof checksum {
+    string md5 = 18;
+    string sha1 = 19;
+    string sha256 = 20;
+  }
+}
+

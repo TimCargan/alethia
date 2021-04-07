@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package alethaia;
+
+import "_proto/file.proto";
+
+message Dataset {
+  string id =1;
+  string name =2;
+
+  oneof location {
+    File file = 3;
+    string file_id =4;
+  }
+
+  message Type {
+    repeated int64 shape = 1;
+    string dtype = 2;
+  }
+
+  map<string, Type> features = 5;
+
+  string meta = 17;
+  bool split_into_folds = 18;
+  int64 number_of_folds = 19;
+
+  //LifeCycle
+  File source = 25;
+
+}
