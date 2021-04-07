@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package alethaia;
+package aletheia;
 
 import "google/protobuf/timestamp.proto";
-import "_proto/file.proto";
-import "_proto/dataset.proto";
+import "aletheia/_proto/file.proto";
+import "aletheia/_proto/dataset.proto";
 
 enum Status {
   UNKNOWN = 0;

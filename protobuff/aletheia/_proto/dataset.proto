@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package alethaia;
+package aletheia;
 
-import "_proto/file.proto";
+import "aletheia/_proto/file.proto";
 
 message Dataset {
   string id =1;

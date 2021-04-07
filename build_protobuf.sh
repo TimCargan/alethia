@@ -1,1 +1,1 @@
-protoc -I=./protobuff --python_out=./aletheia/ ./protobuff/_proto/*
+protoc -I=./protobuff --python_out=./ ./protobuff/*/*/*
