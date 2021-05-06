@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import uuid
 from datetime import datetime
 from aletheia.data import Dataset
 from contextlib import contextmanager
@@ -8,12 +8,28 @@ from google.cloud import firestore
 
 
 class Experiment:
-    def __init__(self, name: str, ex_doc: DocumentReference, ms, debug:bool=False, **kwargs):
-        self._name = name
+    RUNNING = "Running"
+    COMPLETE = "Complete"
+    FAILED = "Failed"
+
+    def __init__(self, name: str, ex_doc: DocumentReference, ms, debug:bool=False, parents:[str]=None):
+        if parents is None:
+            parents = []
+        self._name:str = name
         self._client = ms
         self._doc_ref = ex_doc
-        self._write_blocked = False
-        self._debug = debug
+        self._debug:bool = debug
+
+        # ID info
+        self._parents = parents
+        self._parents_path = "/".join(parents)
+        self._uuid: str = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{self._parents_path}/{name}"))
+
+        # Rate limit writing
+        self._write_blocked:bool = False
+        self._write_limit = 5 # Batch updates so we only write updates every 5 seconds
+        self._delta: dict = {}
+        self._last_update = datetime.now()
 
         # Keys to save to the document
         self._doc_keys = ["status", "metrics", "hyper_params"]
@@ -25,13 +41,14 @@ class Experiment:
         self._hyper_params = None
         self._datasets_used = []
 
+
         # Write empty expr to db, creates document
-        self._doc_ref.set({"status": self._status})
+        self._partial_update({"status": self._status})
 
     def __setattr__(self, key, value):
         """
-        This overides the set att functions of the class
-        Eables .asingment notation
+        This overrides the set att functions of the class
+        Enables .asingment notation
         :param key:
         :param value:
         :return:
@@ -42,31 +59,31 @@ class Experiment:
             #TODO: check types are db safe here
             self._doc_keys.append(key)
             super().__setattr__(key, value)
-            self._partial_update({key: value})
+            self._batch_write({key: value})
 
     def start_sub_exper(self, run_id=None, collection:str="runs") -> Experiment:
         run_id = run_id if run_id is not None else self._run_id()
         run_col = self._doc_ref.collection(collection)
         run_doc = run_col.document(run_id)
-        run = Experiment(run_id, run_doc, self._client)
+        run = Experiment(run_id, run_doc, self._client, parents=self._parents.append(self._name))
         return run.start()
 
     @contextmanager
     def start(self):
         try:
             self._start_time = firestore.SERVER_TIMESTAMP
-            self._partial_update({"start_time": self.start_time})
-            self.status = "Running"
+            self._partial_update({"start_time": self.start_time,
+                                  "status": self.RUNNING})
             yield self
-            self.status = "Complete"
+            self.status = self.COMPLETE
         except Exception as e:
-            self.status = "Failed"
+            self.status = self.FAILD
             self.add_metric("Error", str(e))
             raise e
         finally:
             # Write everything to the metastore
-            self._full_write()
             self._end_time = firestore.SERVER_TIMESTAMP
+            self._full_write()
             self._partial_update({"end_time": self.end_time})
 
     def using_dataset(self, name):
@@ -92,27 +109,42 @@ class Experiment:
 
     def _run_id(self) -> str:
         """
-        Make a new run id
-        TODO: make this better, for now just the time
-        :return: a run id
+        :return: The run id, a UUID5 generated using the URL namespace and the path to the experiment
         """
-        return str(datetime.now())
+        return self._uuid
+
+    ###################################################################################################
+    ###################             Update and DB management                    #######################
+    ###################################################################################################
 
     def _full_write(self):
         """
-        Write the run to the db, its stupid
+        Build a dict representation of the experiment and Write the run to the db
         :return:
         """
         d = {k: v for k,v in self.__dict__.items() if k in self._doc_keys and v is not None}
-        self._doc_ref.update(d)
+        self._partial_update(d)
 
-    def _partial_write(self):
+    def _flush(self):
         """
-        Unimplemented
-        :return:
+        Flush delta dict to the database and update the last write time
+        @return:
         """
-        self._full_write()
-        pass
+        self._partial_update(self._delta)
+        self._delta = {}
+        self._last_update = datetime.now()
+
+    def _batch_write(self, update:dict):
+        """
+        Batch object updates together so that they can be written as a batch update
+        This works by building a dict of updates and only writing if an update comes after the set write limit (default 5 seconds)
+        if no other updates are called (and flush is not called) the updates will be written at experiment close
+        @param update:
+        @return:
+        """
+        self._delta = self._delta | update
+        if (self._last_update - datetime.now()).seconds > self._write_limit:
+            self._flush()
 
     def _partial_update(self, update: dict):
         """
@@ -153,7 +185,7 @@ class Experiment:
     @description.setter
     def description(self, value:str):
         self._description = value
-        self._partial_update({"description": value})
+        self._batch_write({"description": value})
 
     # TODO: write this to the db when called
     @property
@@ -163,7 +195,7 @@ class Experiment:
     @status.setter
     def status(self, status: str):
         self._status = status
-        self._partial_update({"status": status})
+        self._batch_write({"status": status})
 
 
     # TODO: write this to the db when called
@@ -174,7 +206,7 @@ class Experiment:
     @hyper_params.setter
     def hyper_params(self, hps: dict):
         self._hyper_params = hps
-        self._partial_update({"hyper_params": hps})
+        self._batch_write({"hyper_params": hps})
 
     @property
     def metrics(self):
@@ -192,7 +224,7 @@ class Experiment:
         :return:
         """
         self._metrics[name] = value
-        self._partial_update({f"metrics.{name}": value})
+        self._batch_write({f"metrics.{name}": value})
 
     def add_metrics(self, metrics:dict):
         """

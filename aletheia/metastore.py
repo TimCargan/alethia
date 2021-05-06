@@ -12,6 +12,7 @@ class Metastore:
         self._client = firestore.Client(gcp_project)
         self._project_doc = self._client.collection("projects").document(project)
         self.project_root = f"projects/{project}"
+        self.project = project
 
     def _doc(self, path: str) -> firestore.DocumentReference:
         """
@@ -98,6 +99,14 @@ class Metastore:
             return True
         return write_dataset(transaction, dataset_doc)
 
+    def get_expr(self, name) -> Experiment:
+        exp_doc_ref = self._doc(f"experiments/{name}")
+        if not exp_doc_ref.get().exists:
+            raise NameError(f'No Experiment with the name \'{name}\' has been run')
+
+        #This should be a readonly version
+        return Experiment(name, exp_doc_ref, self)
+
     def start_expr(self, name, debug:bool=False, **kwargs) -> Experiment:
         """
         Build an new experiment object
@@ -110,7 +119,7 @@ class Metastore:
         if not debug and exp_doc_ref.get().exists:
             raise NameError(f'An Experiment with the name \'{name}\' has been run')
 
-        exp = Experiment(name, exp_doc_ref, self, debug=debug, **kwargs)
+        exp = Experiment(name, exp_doc_ref, self, debug=debug, parents=[self.project])
         return exp.start()
 
 
