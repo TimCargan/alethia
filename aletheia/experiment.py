@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import os
 import uuid
 from datetime import datetime
 from aletheia.data import Dataset
@@ -77,7 +79,7 @@ class Experiment:
             yield self
             self.status = self.COMPLETE
         except Exception as e:
-            self.status = self.FAILD
+            self.status = self.FAILED
             self.add_metric("Error", str(e))
             raise e
         finally:
@@ -154,6 +156,27 @@ class Experiment:
         """
         if not self._write_blocked:
             self._doc_ref.update(update)
+
+    @property
+    def hierarchical_path(self):
+        """
+        @return: The hierarchical path to the experiment e.g "exid/subexp/.../name"
+        """
+        return os.path.join(self._parents_path, self._name)
+    @hierarchical_path.setter
+    def hierarchical_path(self, value):
+        return
+
+    @property
+    def flat_path(self):
+        """
+        @return: A flat path under the top level experiment_id e.g "expid/123-123-123" no mater current the depth of the
+         nested experiment
+        """
+        return os.path.join(self._parents[0], self._uuid)
+    @flat_path.setter
+    def flat_path(self, value):
+        return
 
     @property
     def datasets_used(self):
