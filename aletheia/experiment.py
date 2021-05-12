@@ -155,7 +155,8 @@ class Experiment:
         :return:
         """
         if not self._write_blocked:
-            self._doc_ref.update(update)
+            self._doc_ref.set(update, merge=True)
+            # self._doc_ref.update(update)
 
 
     @property
