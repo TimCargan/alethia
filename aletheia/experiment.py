@@ -157,6 +157,14 @@ class Experiment:
         if not self._write_blocked:
             self._doc_ref.update(update)
 
+
+    @property
+    def name(self):
+        return self._name
+    @name.setter
+    def name(self, value):
+        return
+
     @property
     def hierarchical_path(self):
         """
