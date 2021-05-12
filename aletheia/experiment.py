@@ -67,7 +67,7 @@ class Experiment:
         run_id = run_id if run_id is not None else self._run_id()
         run_col = self._doc_ref.collection(collection)
         run_doc = run_col.document(run_id)
-        run = Experiment(run_id, run_doc, self._client, parents=self._parents.append(self._name))
+        run = Experiment(run_id, run_doc, self._client, parents=self._parents + [self._name])
         return run.start()
 
     @contextmanager
