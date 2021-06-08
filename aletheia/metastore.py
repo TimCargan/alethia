@@ -119,7 +119,7 @@ class Metastore:
         if not debug and exp_doc_ref.get().exists:
             raise NameError(f'An Experiment with the name \'{name}\' has been run')
 
-        exp = Experiment(name, exp_doc_ref, self, debug=debug, parents=[self.project])
+        exp = Experiment(name, exp_doc_ref, self, debug=debug)
         return exp.start()
 
 
