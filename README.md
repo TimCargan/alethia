@@ -1,25 +1,11 @@
+# Read Me
+This is a very basic experiment tracker that uses firestore to track things.
+its still very much a work in progress and is tailored to my current workflow
 
-## Workflow
-
-Maka a data source
-
-Define a model
-Git commit
-run expr
-will check to see if you are running on an uptodate commit
-run exper
-write results to db etc
-
-
-MetaStore - hold info about expers etc
-BlobStore - holds raw data
-LocalCache - uses metaData to find data, downloads it to the local system
-Repo - Code Tracking / Tagging
-
-Expr runner
-Data Regeister
-
-
+### TODOs:
+- Add dynamic loading of run experiments
+- hook in the data connectors and chache so we can download datasets etc and track them 
+- Add some spark conneectors so I can add it to my data / results pipelines wit ease
 
 ## Usage
 
@@ -27,13 +13,13 @@ Example usage of package in experiments
 
 ```python
 ms = Metastore("alethea-fcf82")
-ms.set_downloader(local_cache)
-exper = ms.exper("exper id", debug=False, auto_inc_ids=True)
-
+ms.set_downloader(local_cache_dir)
+exper = ms.exper("exper Name", debug=False, auto_inc_ids=True)
+exper.desc = "Description / notes etc"
 with expr.start_run(fold=1) as run:
     run.set_fold()
 
-    ds = run.get_dataset("ds_name", download=True) //this will register use of dataset
+    ds = run.get_dataset("ds_name", download=True) #this will register use of dataset
     #for now lets keep fold splitting etc external i.e just download the file to the cache
     path_to_data = ds.local_path
 
@@ -45,9 +31,24 @@ with expr.start_run(fold=1) as run:
 ```
 
 ## Some other notes
+### Workflow
+
+The plan for the workflow is:
+- Maka a data source
+- Define a model
+- Git commit
+- run expr
+- will check to see if you are running on an uptodate commit
+- write results to db etc
+
+
+MetaStore - hold info about expers etc
+BlobStore - holds raw data
+LocalCache - uses metaData to find data, downloads it to the local system
+Repo - Code Tracking / Tagging
 
 ### Database layout
-
+```
 Root
     Projects - col
         Project (e.g zephyous)
@@ -64,10 +65,10 @@ Root
             Metadtata - col
                 name - doc
     Files - col
-    
+ ```   
 ### Data Structs
 
-Data Type
+Data: Type
     Des
     Location
     Source
@@ -75,18 +76,18 @@ Data Type
     Par
     Date Created
 
-Model
+Model:
     Project
     Description
     Version
 
-Fold
+Fold:
     fold
     Model
     Run
     Data
 
-Run
+Run:
     GitHash
     Date
     fold
