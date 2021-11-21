@@ -10,8 +10,8 @@ import enlighten
 
 
 class Azure_datalake_connector():
-    def __init__(self):
-        with open("./adls.key") as f:
+    def __init__(self, key_path="/adls.key"):
+        with open(key_path) as f:
             adls_info = json.load(f)
         self.adl = core.AzureDLFileSystem(lib.auth(**adls_info), store_name=adls_info["store_name"])
 
