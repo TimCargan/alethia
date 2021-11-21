@@ -7,6 +7,14 @@ its still very much a work in progress and is tailored to my current workflow
 - hook in the data connectors and chache so we can download datasets etc and track them 
 - Add some spark conneectors so I can add it to my data / results pipelines wit ease
 
+## Installation
+use pip to install the repo:
+
+`pip install git+https://github.com/TimCargan/aletheia.git`
+
+Make sure to have your auth key in the environment:
+
+`export GOOGLE_APPLICATION_CREDENTIALS = "/path/to/token.json"`
 ## Usage
 
 Example usage of package in experiments
